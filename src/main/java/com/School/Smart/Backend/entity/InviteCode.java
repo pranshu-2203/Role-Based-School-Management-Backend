@@ -1,0 +1,48 @@
+package com.School.Smart.Backend.entity;
+
+import java.time.LocalDateTime;
+
+
+
+import com.School.Smart.Backend.model.Role;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
+
+@Entity
+@Table(name="Invite_Codes")
+@Getter
+@Setter
+public class InviteCode {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(unique=true, nullable =false)
+    private String code;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable=false)
+    private Role roleAllowed;
+
+    private String className;
+    private String section;
+    private String subject;
+    private Long generatedById;
+    @Enumerated(EnumType.STRING)
+    private Role generatedByRole;
+
+    private Long usedById;
+    private boolean isUsed=false;
+    private LocalDateTime expiryTime;
+    private LocalDateTime createdAt=LocalDateTime.now();
+
+}

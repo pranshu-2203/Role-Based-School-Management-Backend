@@ -1,7 +1,7 @@
 package com.School.Smart.Backend.model;
 
 public enum Role {
-    ADMIN, //System Administrator (principle, or higher authority)
+    SUPER_ADMIN, //System Administrator (principle, or higher authority)
     TEACHER, //here Teacher means Subject teacher
     CLASS_TEACHER, //head teacher of specific class
     PRINCIPAL, //head of institute/school

@@ -56,6 +56,11 @@ public class User {
     @Pattern(regexp = "^[0-9]*$", message = "Phone number must contain only digits")
     private String guardianNo;
 
+    
+    private String ClassName;
+    private String Section;
+    private String Subject;
+
     // Registration Status
     private boolean isVerified = false;   // After OTP
     private boolean isApproved = false;   // After Admin/Head approval
