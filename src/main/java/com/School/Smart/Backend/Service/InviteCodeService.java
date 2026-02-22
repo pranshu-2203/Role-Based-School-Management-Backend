@@ -12,20 +12,21 @@ import com.School.Smart.Backend.util.CodeGenerator;
 @Service
 public class InviteCodeService {
     private final InviteCodeRepository inviteCodeRepository;
-    public InviteCodeService(InviteCodeRepository inviteCodeRepository){
-        this.inviteCodeRepository=inviteCodeRepository;
+
+    public InviteCodeService(InviteCodeRepository inviteCodeRepository) {
+        this.inviteCodeRepository = inviteCodeRepository;
     }
 
     public InviteCode generateCode(
-        Role roleAllwoed,
-        String className,
-        String section,
-        String subject,
-        Long generateById,
-        Role GenerateByRole
+            Role roleAllwoed,
+            String className,
+            String section,
+            String subject,
+            Long generateById,
+            Role GenerateByRole
 
-    ){
-        InviteCode inviteCode=new InviteCode();
+    ) {
+        InviteCode inviteCode = new InviteCode();
         inviteCode.setCode(CodeGenerator.generateCode());
         inviteCode.setRoleAllowed(roleAllwoed);
         inviteCode.setClassName(className);
@@ -37,12 +38,21 @@ public class InviteCodeService {
 
         return inviteCodeRepository.save(inviteCode);
 
-
     }
-    public InviteCode validateCode(String code,Role expectedRole){
-        InviteCode invite=inviteCodeRepository.findByCode(code).orElseThrow(()->new RuntimeException("Invalid Code"));
 
-        
+    public InviteCode generateCode(
+            Role roleAllowed,
+            String className,
+            String section,
+            String subject,
+            Long generatedById) {
+        return generateCode(roleAllowed, className, section, subject, generatedById, null);
+    }
+
+    public InviteCode validateCode(String code, Role expectedRole) {
+        InviteCode invite = inviteCodeRepository.findByCode(code)
+                .orElseThrow(() -> new RuntimeException("Invalid Code"));
+
         if (invite.isUsed()) {
             throw new RuntimeException("Code already used");
         }
@@ -56,10 +66,10 @@ public class InviteCodeService {
         }
 
         return invite;
-    
+
     }
 
-    public void markAsUSed(InviteCode invite,Long userId){
+    public void markAsUSed(InviteCode invite, Long userId) {
         invite.setUsed(true);
         invite.setUsedById(userId);
         inviteCodeRepository.save(invite);

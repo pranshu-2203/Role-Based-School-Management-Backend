@@ -14,10 +14,12 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
+@Data
 @Table(name="Invite_Codes")
 @Getter
 @Setter
@@ -27,11 +29,11 @@ public class InviteCode {
     private Long id;
 
     @Column(unique=true, nullable =false)
-    private String code;
+    private String code; //invite code
 
     @Enumerated(EnumType.STRING)
     @Column(nullable=false)
-    private Role roleAllowed;
+    private Role roleAllowed; //which role are allwoed to use the code
 
     private String className;
     private String section;
