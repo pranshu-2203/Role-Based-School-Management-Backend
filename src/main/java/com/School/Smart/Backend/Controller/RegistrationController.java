@@ -14,33 +14,31 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class RegistrationController {
     private final RegistrationService registrationService;
 
-    //Register basic user
+    // Register basic user
     @PostMapping("/register")
-    public ResponseEntity<String>register(
-        @Valid
-        @RequestBody 
-        RegisterRequest registerRequest) {
-        registrationService.registerBasicUser(registerRequest.getFullname(), registerRequest.getEmail(), registerRequest.getPassword(),registerRequest.getRole());
+    public ResponseEntity<String> register(
+            @Valid @RequestBody RegisterRequest registerRequest) {
+        registrationService.registerBasicUser(registerRequest.getFullname(), registerRequest.getEmail(),
+                registerRequest.getPassword(), registerRequest.getRole());
         return ResponseEntity.ok("Registration successful. Otp sent tp email for authentication.");
     }
-    
-    //Verify otp
+
+    // Verify otp
 
     @PostMapping("/verify-otp")
-    public ResponseEntity<String> verifyotp(
-        @Valid
-        @RequestBody
-        OtpVerfyRequest request
-    ){
-        registrationService.verifyOtp(request.getEmail(), request.getOtp());
-        return ResponseEntity.ok("OTP verfied Successfully");
+    public ResponseEntity<String> verifyotp(@RequestBody OtpVerfyRequest request) {
+        try {
+            registrationService.verifyOtp(request.getEmail(), request.getOtp());
+            return ResponseEntity.ok("OTP verified successfully");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
 }

@@ -21,10 +21,10 @@ public class RegistrationService {
     private final OtpVerficationRepository otpVerficationRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public void registerBasicUser(String fullname,String email, String password, Role role){
+    public void registerBasicUser(String Fullname,String email, String password, Role role){
 
         User user=new User();
-        user.setFullname(fullname);
+        user.setFullname(Fullname);
         user.setEmail(email);
         //user.setPassword(password);
         user.setRole(role);

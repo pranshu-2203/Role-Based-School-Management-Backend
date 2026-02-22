@@ -24,7 +24,7 @@ public class User {
     // Basic Information
     @NotBlank(message = "Full name is required")
     @Column(name = "full_name",nullable=false)
-    private String fullname;
+    private String Fullname;
 
     @NotBlank(message = "Email is required")
     @Email(message = "Invalid email format")
