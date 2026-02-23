@@ -1,6 +1,7 @@
 package com.School.Smart.Backend.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 
@@ -73,5 +74,8 @@ public class InviteCodeService {
         invite.setUsed(true);
         invite.setUsedById(userId);
         inviteCodeRepository.save(invite);
+    }
+    public List<InviteCode> getCodeByGenerator(Long generatedById){
+        return inviteCodeRepository.findByGeneratedById(generatedById);
     }
 }
