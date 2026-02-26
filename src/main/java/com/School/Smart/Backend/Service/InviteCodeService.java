@@ -1,81 +1,157 @@
 package com.School.Smart.Backend.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.School.Smart.Backend.entity.InviteCode;
+import com.School.Smart.Backend.exception.AuthorizationException;
+import com.School.Smart.Backend.exception.InviteException;
 import com.School.Smart.Backend.model.Role;
 import com.School.Smart.Backend.repository.InviteCodeRepository;
+import com.School.Smart.Backend.repository.UserRepository;
 import com.School.Smart.Backend.util.CodeGenerator;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class InviteCodeService {
+
     private final InviteCodeRepository inviteCodeRepository;
+    private final UserRepository userRepository;
 
-    public InviteCodeService(InviteCodeRepository inviteCodeRepository) {
-        this.inviteCodeRepository = inviteCodeRepository;
-    }
-
-    public InviteCode generateCode(
-            Role roleAllwoed,
-            String className,
-            String section,
-            String subject,
-            Long generateById,
-            Role GenerateByRole
-
-    ) {
-        InviteCode inviteCode = new InviteCode();
-        inviteCode.setCode(CodeGenerator.generateCode());
-        inviteCode.setRoleAllowed(roleAllwoed);
-        inviteCode.setClassName(className);
-        inviteCode.setSection(section);
-        inviteCode.setSubject(subject);
-        inviteCode.setGeneratedById(generateById);
-        inviteCode.setGeneratedByRole(GenerateByRole);
-        inviteCode.setExpiryTime(LocalDateTime.now().plusHours(12));
-
-        return inviteCodeRepository.save(inviteCode);
-
-    }
-
+    @Transactional
     public InviteCode generateCode(
             Role roleAllowed,
             String className,
             String section,
-            String subject,
-            Long generatedById) {
-        return generateCode(roleAllowed, className, section, subject, generatedById, null);
+            List<String> subjects,
+            Long generatedById,
+            String intendedPersonName) {
+
+        var generator = userRepository.findById(generatedById)
+                .orElseThrow(() -> new AuthorizationException("Generator not found"));
+
+        enforceHierarchy(generator.getRole(), roleAllowed);
+
+        InviteCode invite = new InviteCode();
+        invite.setCode(CodeGenerator.generateCode());
+        invite.setRoleAllowed(roleAllowed);
+        invite.setClassName(className);
+        invite.setSection(section);
+        if (roleAllowed == Role.CLASS_TEACHER || roleAllowed == Role.TEACHER) {
+
+            if (subjects == null || subjects.isEmpty()) {
+                throw new RuntimeException("Subjects are required for this role");
+            }
+
+            invite.setSubject(new ArrayList<>(subjects));
+
+        } else {
+            invite.setSubject(new ArrayList<>());
+        }
+        invite.setGeneratedById(generatedById);
+        invite.setGeneratedByRole(generator.getRole());
+        invite.setIntendedPersonName(intendedPersonName.trim());
+        invite.setExpiryTime(LocalDateTime.now().plusHours(12));
+        invite.setUsed(false);
+
+        return inviteCodeRepository.save(invite);
+    }
+
+    private void enforceHierarchy(Role generatorRole, Role roleAllowed) {
+
+        if (generatorRole == Role.PRINCIPAL && roleAllowed != Role.CLASS_TEACHER) {
+            throw new AuthorizationException("Principal can only generate ClassTeacher invites");
+        }
+
+        if (generatorRole == Role.CLASS_TEACHER &&
+                !(roleAllowed == Role.TEACHER || roleAllowed == Role.STUDENT)) {
+            throw new AuthorizationException("ClassTeacher can only generate Teacher or Student invites");
+        }
+
+        if (generatorRole == Role.TEACHER || generatorRole == Role.STUDENT) {
+            throw new AuthorizationException("You are not authorized to generate invites");
+        }
     }
 
     public InviteCode validateCode(String code, Role expectedRole) {
+
         InviteCode invite = inviteCodeRepository.findByCode(code)
-                .orElseThrow(() -> new RuntimeException("Invalid Code"));
+                .orElseThrow(() -> new InviteException("Invalid code"));
 
-        if (invite.isUsed()) {
-            throw new RuntimeException("Code already used");
-        }
+        if (invite.isUsed())
+            throw new InviteException("Code already used");
 
-        if (invite.getExpiryTime().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Code expired");
-        }
+        if (invite.getExpiryTime().isBefore(LocalDateTime.now()))
+            throw new InviteException("Code expired");
 
-        if (!invite.getRoleAllowed().equals(expectedRole)) {
-            throw new RuntimeException("Code not valid for this role");
-        }
+        if (!invite.getRoleAllowed().equals(expectedRole))
+            throw new InviteException("Code not valid for this role");
 
         return invite;
-
     }
 
-    public void markAsUSed(InviteCode invite, Long userId) {
+    @Transactional
+    public void markAsUsed(InviteCode invite, Long userId) {
         invite.setUsed(true);
         invite.setUsedById(userId);
         inviteCodeRepository.save(invite);
     }
-    public List<InviteCode> getCodeByGenerator(Long generatedById){
+
+    @Transactional
+    public List<InviteCode> massGenerateCodes(
+            Role roleAllowed,
+            String className,
+            String section,
+            List<String> subjects,
+            Long generatedById,
+            List<String> names) {
+
+        var generator = userRepository.findById(generatedById)
+                .orElseThrow(() -> new AuthorizationException("Generator not found"));
+
+        enforceHierarchy(generator.getRole(), roleAllowed);
+
+        List<InviteCode> invites = new ArrayList<>();
+
+        for (String name : names) {
+            InviteCode invite = new InviteCode();
+            invite.setCode(CodeGenerator.generateCode());
+            invite.setRoleAllowed(roleAllowed);
+            invite.setClassName(className);
+            invite.setSection(section);
+            invite.setSubject(subjects);
+            invite.setGeneratedById(generatedById);
+            invite.setGeneratedByRole(generator.getRole());
+            invite.setIntendedPersonName(name.trim());
+            invite.setExpiryTime(LocalDateTime.now().plusHours(12));
+            invite.setUsed(false);
+
+            invites.add(invite);
+        }
+
+        return inviteCodeRepository.saveAll(invites);
+    }
+
+    public InviteCode getValidInviteWithoutUsing(String code) {
+        InviteCode invite = inviteCodeRepository.findByCode(code)
+                .orElseThrow(() -> new InviteException("Invalid code"));
+
+        if (invite.isUsed())
+            throw new InviteException("Code already used");
+
+        if (invite.getExpiryTime().isBefore(LocalDateTime.now()))
+            throw new InviteException("Code expired");
+
+        return invite;
+    }
+
+    public List<InviteCode> getCodeByGenerator(Long generatedById) {
         return inviteCodeRepository.findByGeneratedById(generatedById);
     }
 }

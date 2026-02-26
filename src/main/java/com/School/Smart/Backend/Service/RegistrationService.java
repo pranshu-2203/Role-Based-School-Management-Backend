@@ -1,10 +1,12 @@
 package com.School.Smart.Backend.Service;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
-import java.util.Random;
+import java.util.ArrayList;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.School.Smart.Backend.entity.InviteCode;
 import com.School.Smart.Backend.model.OtpVerfication;
@@ -18,65 +20,97 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class RegistrationService {
+
     private final UserRepository userRepository;
-    private final OtpVerficationRepository otpVerficationRepository;
+    private final OtpVerficationRepository otpRepository;
     private final PasswordEncoder passwordEncoder;
     private final InviteCodeService inviteCodeService;
 
-    public void registerBasicUser(String Fullname,String email, String password, Role role,String inviteCode){
+    private final SecureRandom secureRandom = new SecureRandom();
 
+    @Transactional
+    public void registerBasicUser(
+            String fullname,
+            String email,
+            String password,
+            Role role,
+            String inviteCode) {
 
-        InviteCode invite=inviteCodeService.validateCode(inviteCode, role);
-        if(userRepository.existsByEmail(email)){
-            throw new RuntimeException("Email already registered");
+        InviteCode invite = inviteCodeService.validateCode(inviteCode, role);
+
+        if (!invite.getIntendedPersonName().trim()
+                .equalsIgnoreCase(fullname.trim())) {
+            throw new RuntimeException("This invite code is assigned to another person");
         }
-        User user=new User();
-        user.setFullname(Fullname);
-        user.setEmail(email);
-        //user.setPassword(password);
+
+        if (userRepository.existsByEmail(email))
+            throw new RuntimeException("Email already registered");
+
+        User user = new User();
+        user.setFullname(fullname.trim());
+        user.setEmail(email.trim());
         user.setRole(role);
+        user.setPassword(passwordEncoder.encode(password));
         user.setVerified(false);
         user.setApproved(false);
-
-        user.setPassword(passwordEncoder.encode(password));
         user.setProfileCompleted(false);
+
         user.setClassName(invite.getClassName());
         user.setSection(invite.getSection());
-        user.setSubject(invite.getSubject());
+
+        //Subject for disctinct Roles
+        if (role == Role.CLASS_TEACHER || role == Role.TEACHER) {
+            user.setSubject(new ArrayList<>(invite.getSubject()));
+        } else {
+            user.setSubject(new ArrayList<>());
+        }
 
         userRepository.save(user);
 
-        //Mark invite as used
+        inviteCodeService.markAsUsed(invite, user.getId());
 
-        inviteCodeService.markAsUSed(invite, user.getId());
-        //Otp genration
-        String otp=String.valueOf(100000+new Random().nextInt(900000));
-        OtpVerfication otpEntity=new OtpVerfication();
+        generateOtp(email);
+    }
+    //Generate otp of 6 digit
+
+    private void generateOtp(String email) {
+        String otp = String.valueOf(100000 + secureRandom.nextInt(900000));
+
+        OtpVerfication otpEntity = new OtpVerfication();
         otpEntity.setEmail(email);
         otpEntity.setOtpCode(otp);
-        otpEntity.setExpiryTime(LocalDateTime.now().plusSeconds(300));
+        otpEntity.setExpiryTime(LocalDateTime.now().plusMinutes(5));
+        otpEntity.setUsed(false);
 
-        otpVerficationRepository.save(otpEntity);
+        otpRepository.save(otpEntity);
 
-        System.out.println("OTP generatd: "+otp);
-
-
-
+        System.out.println("OTP generated: " + otp);
     }
 
-    public void verifyOtp(String email,String otpIntput){
-        OtpVerfication otpEntity=otpVerficationRepository.findTopByEmailOrderByCreatedAtDesc(email).orElseThrow(()->new RuntimeException("Otp not found"));
-        if(otpEntity.isUsed()) throw new RuntimeException("Otp Alrady used");
-        if(otpEntity.getExpiryTime().isBefore(LocalDateTime.now())) throw new RuntimeException("Otp is Expired");
-        if(!otpEntity.getOtpCode().equals(otpIntput)) throw new RuntimeException("Invalid OTP");
+    //Verify otp
+    @Transactional
+    public void verifyOtp(String email, String otpInput) {
+
+        OtpVerfication otpEntity = otpRepository
+                .findTopByEmailOrderByCreatedAtDesc(email)
+                .orElseThrow(() -> new RuntimeException("OTP not found"));
+
+        if (otpEntity.isUsed())
+            throw new RuntimeException("OTP already used");
+
+        if (otpEntity.getExpiryTime().isBefore(LocalDateTime.now()))
+            throw new RuntimeException("OTP expired");
+
+        if (!otpEntity.getOtpCode().equals(otpInput))
+            throw new RuntimeException("Invalid OTP");
 
         otpEntity.setUsed(true);
-        otpVerficationRepository.save(otpEntity);
+        otpRepository.save(otpEntity);
 
-        User user= userRepository.findByEmail(email).orElseThrow(()->new RuntimeException("User not found"));
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
         user.setVerified(true);
         userRepository.save(user);
     }
-
-
 }
