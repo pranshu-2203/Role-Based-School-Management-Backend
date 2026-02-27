@@ -8,6 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.School.Smart.Backend.DTO.ProfileCompletionRequest;
 import com.School.Smart.Backend.entity.InviteCode;
 import com.School.Smart.Backend.model.OtpVerfication;
 import com.School.Smart.Backend.model.Role;
@@ -58,7 +59,7 @@ public class RegistrationService {
         user.setClassName(invite.getClassName());
         user.setSection(invite.getSection());
 
-        //Subject for disctinct Roles
+        // Subject for disctinct Roles
         if (role == Role.CLASS_TEACHER || role == Role.TEACHER) {
             user.setSubject(new ArrayList<>(invite.getSubject()));
         } else {
@@ -71,7 +72,7 @@ public class RegistrationService {
 
         generateOtp(email);
     }
-    //Generate otp of 6 digit
+    // Generate otp of 6 digit
 
     private void generateOtp(String email) {
         String otp = String.valueOf(100000 + secureRandom.nextInt(900000));
@@ -87,7 +88,7 @@ public class RegistrationService {
         System.out.println("OTP generated: " + otp);
     }
 
-    //Verify otp
+    // Verify otp
     @Transactional
     public void verifyOtp(String email, String otpInput) {
 
@@ -111,6 +112,47 @@ public class RegistrationService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         user.setVerified(true);
+        userRepository.save(user);
+    }
+    @Transactional
+    public void completeProfile(Long userId, ProfileCompletionRequest request) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (user.isProfileCompleted()) {
+            throw new RuntimeException("Profile already completed");
+        }
+
+        switch (user.getRole()) {
+
+            case STUDENT -> {
+                if (request.getFatherName() == null ||
+                        request.getGuardianNo() == null ||
+                        request.getEmergencyNo() == null) {
+                    throw new RuntimeException("Student profile incomplete");
+                }
+
+                user.setFatherName(request.getFatherName());
+                user.setMotherName(request.getMotherName());
+                user.setGuardianName(request.getGuardianName());
+                user.setGuardianNo(request.getGuardianNo());
+                user.setEmergencyNo(request.getEmergencyNo());
+            }
+
+            case TEACHER, CLASS_TEACHER -> {
+                if (user.getSubject() == null || user.getSubject().isEmpty()) {
+                    if (request.getSubjects() == null || request.getSubjects().isEmpty()) {
+                        throw new RuntimeException("Subjects required for teacher");
+                    }
+                    user.setSubject(request.getSubjects());
+                }
+            }
+
+            default -> throw new RuntimeException("Profile not required for this role");
+        }
+
+        user.setProfileCompleted(true);
         userRepository.save(user);
     }
 }

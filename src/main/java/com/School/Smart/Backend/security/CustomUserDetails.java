@@ -11,29 +11,32 @@ import com.School.Smart.Backend.model.User;
 
 import lombok.Getter;
 
+
 @Getter
 public class CustomUserDetails implements UserDetails {
 
-    private final String email;
-    private final String password;
-    private final String role;
+    private final User user;
 
     public CustomUserDetails(User user) {
-        this.email = user.getEmail();
-        this.password = user.getPassword();
-        this.role = user.getRole().name();
+        this.user = user;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singleton(new SimpleGrantedAuthority("ROLE_" + role));
+        return Collections.singleton(
+                new SimpleGrantedAuthority("ROLE_" + user.getRole().name())
+        );
     }
 
     @Override
-    public String getUsername() { return email; }
+    public String getUsername() {
+        return user.getEmail();
+    }
 
     @Override
-    public String getPassword() { return password; }
+    public String getPassword() {
+        return user.getPassword();
+    }
 
     @Override
     public boolean isAccountNonExpired() { return true; }
@@ -45,5 +48,5 @@ public class CustomUserDetails implements UserDetails {
     public boolean isCredentialsNonExpired() { return true; }
 
     @Override
-    public boolean isEnabled() { return true; }
+    public boolean isEnabled() { return user.isVerified(); }
 }
