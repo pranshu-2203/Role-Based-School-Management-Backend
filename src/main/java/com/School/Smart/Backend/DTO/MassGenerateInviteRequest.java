@@ -1,6 +1,7 @@
 package com.School.Smart.Backend.DTO;
 
 import java.util.List;
+import java.util.Map;
 
 import com.School.Smart.Backend.model.Role;
 
@@ -18,8 +19,8 @@ public class MassGenerateInviteRequest {
     @NotBlank(message = "Enter class Section")
     private String section;
 
-    //@NotEmpty(message="Enter Subject only For Teachers Role")
-    private List<String> subject;
+   
+    private List<String> SubjectPerTeacher;
     @NotNull
     private Long generatedById;
     @NotEmpty(message="Names List cannot be Empty")

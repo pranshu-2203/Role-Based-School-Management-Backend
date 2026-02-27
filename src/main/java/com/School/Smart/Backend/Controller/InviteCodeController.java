@@ -82,7 +82,7 @@ public class InviteCodeController {
                         request.getRoleAllowed(),
                         request.getClassName(),
                         request.getSection(),
-                        request.getSubject(),
+                        request.getSubjectPerTeacher(),
                         request.getGeneratedById(),
                         request.getNames()
                 )

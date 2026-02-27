@@ -2,7 +2,9 @@ package com.School.Smart.Backend.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -108,7 +110,7 @@ public class InviteCodeService {
             Role roleAllowed,
             String className,
             String section,
-            List<String> subjects,
+            List<String> subjectsPerTeacher,
             Long generatedById,
             List<String> names) {
 
@@ -116,19 +118,26 @@ public class InviteCodeService {
                 .orElseThrow(() -> new AuthorizationException("Generator not found"));
 
         enforceHierarchy(generator.getRole(), roleAllowed);
-
         List<InviteCode> invites = new ArrayList<>();
 
-        for (String name : names) {
+        for (int i = 0; i < names.size(); i++) {
+
             InviteCode invite = new InviteCode();
             invite.setCode(CodeGenerator.generateCode());
             invite.setRoleAllowed(roleAllowed);
             invite.setClassName(className);
             invite.setSection(section);
-            invite.setSubject(subjects);
+            if (roleAllowed == Role.TEACHER) {
+                if (subjectsPerTeacher.size() != names.size()) {
+                    throw new IllegalArgumentException("Names and subjects size must match for teachers");
+                }
+                invite.setSubject(Collections.singletonList(subjectsPerTeacher.get(i)));
+            } else {
+                invite.setSubject(Collections.emptyList());
+            }
             invite.setGeneratedById(generatedById);
             invite.setGeneratedByRole(generator.getRole());
-            invite.setIntendedPersonName(name.trim());
+            invite.setIntendedPersonName(names.get(i).trim());
             invite.setExpiryTime(LocalDateTime.now().plusHours(12));
             invite.setUsed(false);
 
