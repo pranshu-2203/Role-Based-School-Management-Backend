@@ -1,6 +1,7 @@
 package com.School.Smart.Backend.model;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -23,7 +24,7 @@ public class User {
 
     // Basic Information
     @NotBlank(message = "Full name is required")
-    @Column(name = "full_name",nullable=false)
+    @Column(name = "full_name", nullable = false)
     private String Fullname;
 
     @NotBlank(message = "Email is required")
@@ -31,12 +32,7 @@ public class User {
     @Column(unique = true, nullable = false)
     private String email;
 
-    /*@NotBlank(message = "Password is required")
-    @Size(min = 8, max = 20, message = "Password must be 8-20 characters")
-    @Pattern(
-        regexp = "^[A-Za-z0-9]+$",
-        message = "Password must contain only letters and numbers"
-    )*/
+    
     private String password;
 
     @Enumerated(EnumType.STRING)
@@ -56,12 +52,19 @@ public class User {
     @Pattern(regexp = "^[0-9]*$", message = "Phone number must contain only digits")
     private String guardianNo;
 
-    // Registration Status
-    private boolean isVerified = false;   // After OTP
-    private boolean isApproved = false;   // After Admin/Head approval
+    private String ClassName;
+    private String Section;
+    @ElementCollection
+    @CollectionTable(name = "user_subjects", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "subject")
+    private List<String> subject;
+
+    
+    private boolean isVerified = false; // After OTP
+    private boolean isApproved = false; // After Admin/Head approval
     private boolean profileCompleted = false;
 
-    // Hierarchy
+    
     @ManyToOne
     @JoinColumn(name = "created_by")
     private User createdBy;

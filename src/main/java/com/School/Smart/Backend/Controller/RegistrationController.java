@@ -24,8 +24,13 @@ public class RegistrationController {
     @PostMapping("/register")
     public ResponseEntity<String> register(
             @Valid @RequestBody RegisterRequest registerRequest) {
-        registrationService.registerBasicUser(registerRequest.getFullname(), registerRequest.getEmail(),
-                registerRequest.getPassword(), registerRequest.getRole());
+        registrationService.registerBasicUser(
+                registerRequest.getFullname(),
+                registerRequest.getEmail(),
+                registerRequest.getPassword(),
+                registerRequest.getRole(),
+                registerRequest.getInviteCode());
+        
         return ResponseEntity.ok("Registration successful. Otp sent tp email for authentication.");
     }
 
