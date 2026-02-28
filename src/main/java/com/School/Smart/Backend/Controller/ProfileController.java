@@ -5,18 +5,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.School.Smart.Backend.DTO.ProfileCompletionRequest;
 import com.School.Smart.Backend.Service.RegistrationService;
-import com.School.Smart.Backend.model.User;
 import com.School.Smart.Backend.security.CustomUserDetails;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
