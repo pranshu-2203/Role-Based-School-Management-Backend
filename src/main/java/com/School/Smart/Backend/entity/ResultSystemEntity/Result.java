@@ -1,5 +1,6 @@
 package com.School.Smart.Backend.entity.ResultSystemEntity;
 
+import java.time.LocalDate;
 import java.util.Map;
 
 import jakarta.persistence.CollectionTable;
@@ -39,6 +40,13 @@ public class Result {
     private Integer totalMarks;
 
     private Double percentage;
+
+    @Enumerated(EnumType.STRING)
+    private ExamType examType;
+
+    private LocalDate publishDate;
+
+    private LocalDate expiryDate;
 
     @Enumerated(EnumType.STRING)
     private PassStatus passStatus;

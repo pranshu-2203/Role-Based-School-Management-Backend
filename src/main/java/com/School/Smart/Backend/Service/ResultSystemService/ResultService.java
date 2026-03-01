@@ -1,5 +1,6 @@
 package com.School.Smart.Backend.Service.ResultSystemService;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,6 +22,8 @@ public class ResultService {
     }
 
     public ResultResponse addResult(ResultRequest resultRequest) {
+
+        
 
         if (resultRequest.getTotalMarks() == null || resultRequest.getTotalMarks() == 0) {
             throw new IllegalArgumentException("Total marks must be greater than 0");
@@ -49,6 +52,38 @@ public class ResultService {
 
         result.setPercentage(percentage);
         result.setPassStatus(getPassStatus(percentage));
+
+
+         result.setExamType(resultRequest.getExamType());
+
+    LocalDate today = LocalDate.now();
+    result.setPublishDate(today);
+
+    LocalDate expiryDate;
+
+    switch (resultRequest.getExamType()) {
+        case MONTHLY:
+            expiryDate = today.plusDays(15);
+            break;
+        case FIRST_TERM:
+        case SECOND_TERM:
+            expiryDate = today.plusDays(20);
+            break;
+        case QUARTERLY:
+            expiryDate = today.plusMonths(1);
+            break;
+        case HALF_YEARLY:
+            expiryDate = today.plusMonths(1);
+            break;
+        case ANNUAL:
+            expiryDate = today.plusMonths(3);
+            break;
+        default:
+            throw new IllegalArgumentException("Invalid exam type");
+    }
+
+    result.setExpiryDate(expiryDate);
+
 
         result = resultRepository.save(result);
 
@@ -85,7 +120,9 @@ public class ResultService {
 
     public List<ResultResponse> getResultByStudentId(Long studentId) {
 
-        return resultRepository.findByStudentId(studentId)
+        
+
+        return resultRepository.findByStudentIdAndExpiryDateAfter(studentId, LocalDate.now())
                 .stream()
                 .map(r -> new ResultResponse(
                         r.getId(),

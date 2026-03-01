@@ -4,6 +4,8 @@ package com.School.Smart.Backend.DTO.ResultSystemDTO;
 
 import java.util.Map;
 
+import com.School.Smart.Backend.entity.ResultSystemEntity.ExamType;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,4 +18,5 @@ public class ResultRequest {
     private Map<String, Integer> subjects;
     //private Integer marksObtained;
     private Integer totalMarks;   
+    private ExamType examType;
 }
