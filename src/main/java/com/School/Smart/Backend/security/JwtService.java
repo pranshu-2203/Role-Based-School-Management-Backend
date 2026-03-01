@@ -66,4 +66,14 @@ public class JwtService {
                 .parseClaimsJws(token)
                 .getBody();
     }
+
+    public Long extractStudentId(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        return claims.get("userId", Long.class);
+    }
 }

@@ -8,4 +8,6 @@ import com.School.Smart.Backend.entity.ResultSystemEntity.Result;
 
 public interface ResultRepository extends JpaRepository<Result, Long> {
     List<Result> findByStudentId(Long studentId);
+
+    //List<Result> findByStudentName(String studentName);
 }

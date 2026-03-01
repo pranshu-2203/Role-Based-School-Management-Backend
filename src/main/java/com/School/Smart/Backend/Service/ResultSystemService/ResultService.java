@@ -22,45 +22,44 @@ public class ResultService {
 
     public ResultResponse addResult(ResultRequest resultRequest) {
 
-    if (resultRequest.getTotalMarks() == null || resultRequest.getTotalMarks() == 0) {
-        throw new IllegalArgumentException("Total marks must be greater than 0");
+        if (resultRequest.getTotalMarks() == null || resultRequest.getTotalMarks() == 0) {
+            throw new IllegalArgumentException("Total marks must be greater than 0");
+        }
+
+        if (resultRequest.getSubjects() == null || resultRequest.getSubjects().isEmpty()) {
+            throw new IllegalArgumentException("Subjects cannot be empty");
+        }
+
+        // 🔥 Calculate total obtained from subjects map
+        int totalObtained = resultRequest.getSubjects()
+                .values()
+                .stream()
+                .mapToInt(Integer::intValue)
+                .sum();
+
+        Result result = new Result();
+        result.setStudentId(resultRequest.getStudentId());
+        result.setStudentName(resultRequest.getStudentName());
+        result.setSubjects(resultRequest.getSubjects());
+        result.setTotalMarksObtained(totalObtained); // ✅ fixed
+        result.setTotalMarks(resultRequest.getTotalMarks());
+
+        double percentage = (totalObtained * 100.0)
+                / resultRequest.getTotalMarks();
+
+        result.setPercentage(percentage);
+        result.setPassStatus(getPassStatus(percentage));
+
+        result = resultRepository.save(result);
+
+        return new ResultResponse(
+                result.getId(),
+                result.getSubjects(),
+                result.getTotalMarksObtained(),
+                result.getTotalMarks(),
+                result.getPercentage(),
+                result.getPassStatus());
     }
-
-    if (resultRequest.getSubjects() == null || resultRequest.getSubjects().isEmpty()) {
-        throw new IllegalArgumentException("Subjects cannot be empty");
-    }
-
-    // 🔥 Calculate total obtained from subjects map
-    int totalObtained = resultRequest.getSubjects()
-            .values()
-            .stream()
-            .mapToInt(Integer::intValue)
-            .sum();
-
-    Result result = new Result();
-    result.setStudentId(resultRequest.getStudentId());
-    result.setStudentName(resultRequest.getStudentName());
-    result.setSubjects(resultRequest.getSubjects());
-    result.setTotalMarksObtained(totalObtained);  // ✅ fixed
-    result.setTotalMarks(resultRequest.getTotalMarks());
-
-    double percentage = (totalObtained * 100.0)
-            / resultRequest.getTotalMarks();
-
-    result.setPercentage(percentage);
-    result.setPassStatus(getPassStatus(percentage));
-
-    result = resultRepository.save(result);
-
-    return new ResultResponse(
-            result.getStudentName(),
-            result.getSubjects(),
-            result.getTotalMarksObtained(),
-            result.getTotalMarks(),
-            result.getPercentage(),
-            result.getPassStatus()
-    );
-}
 
     private PassStatus getPassStatus(double percentage) {
 
@@ -84,23 +83,17 @@ public class ResultService {
         }
     }
 
-    public List<ResultResponse> getResultsByStudent(Long studentId) {
+    public List<ResultResponse> getResultByStudentId(Long studentId) {
 
-        List<Result> results = resultRepository.findByStudentId(studentId);
-
-        if (results.isEmpty()) {
-            throw new IllegalArgumentException(
-                    "No results found for student ID: " + studentId);
-        }
-
-        return results.stream()
+        return resultRepository.findByStudentId(studentId)
+                .stream()
                 .map(r -> new ResultResponse(
-                        r.getStudentName(),
+                        r.getId(),
                         r.getSubjects(),
                         r.getTotalMarksObtained(),
                         r.getTotalMarks(),
                         r.getPercentage(),
                         r.getPassStatus()))
-                .collect(Collectors.toList());
+                .toList();
     }
 }
