@@ -52,8 +52,8 @@ public class User {
     @Pattern(regexp = "^[0-9]*$", message = "Phone number must contain only digits")
     private String guardianNo;
 
-    private String ClassName;
-    private String Section;
+    private String className;
+    private String section;
     @ElementCollection
     @CollectionTable(name = "user_subjects", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "subject")

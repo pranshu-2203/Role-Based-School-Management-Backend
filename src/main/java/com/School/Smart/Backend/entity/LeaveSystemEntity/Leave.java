@@ -22,6 +22,11 @@ public class Leave {
     private Long id;
     private String studentName;
     private Long studentId;
+
+    private String className;
+    private String section;
+    private String gurdianNo;
+    
     private Long teacherId;
     private LocalDate fromDate;
     private LocalDate toDate;
