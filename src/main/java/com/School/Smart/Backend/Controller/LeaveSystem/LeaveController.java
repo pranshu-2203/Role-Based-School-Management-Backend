@@ -2,47 +2,69 @@ package com.School.Smart.Backend.Controller.LeaveSystem;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.School.Smart.Backend.DTO.LeaveSystem.LeaveRequest;
-import com.School.Smart.Backend.DTO.LeaveSystem.LeaveResponse;
 import com.School.Smart.Backend.Service.LeaveSystemService.LeaveService;
 import com.School.Smart.Backend.entity.LeaveSystemEntity.Leave;
+import com.School.Smart.Backend.entity.LeaveSystemEntity.LeaveStatus;
+import com.School.Smart.Backend.security.CustomUserDetails;
 
 @RestController
-@RequestMapping("/Request_Leave")
+@RequestMapping("/leave")
 public class LeaveController {
+
     private final LeaveService leaveService;
 
     public LeaveController(LeaveService leaveService) {
         this.leaveService = leaveService;
     }
 
+  
     @PostMapping("/Apply")
-    public LeaveResponse applyLeave(
-            @RequestBody LeaveRequest leaveRequest) {
-        return leaveService.applyLeave(leaveRequest);
+    public ResponseEntity<?> applyLeave(
+            @RequestBody LeaveRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        leaveService.applyLeave(request, userDetails.getUsername());
+        return ResponseEntity.ok("Leave applied successfully");
     }
 
-    @PutMapping("/Approve_Leave/{studentName}")
-    public LeaveResponse approveLeaveByName(@PathVariable String studentName) {
-        return leaveService.approveLeave(studentName);
+   
+    @GetMapping("/Leave-Status")
+    public List<Leave> viewMyLeaves(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        return leaveService.getStudentLeaves(userDetails.getUsername());
     }
 
-    @PutMapping("/Reject_Leave/{studentName}")
-    public LeaveResponse rejectLeaveByName(@PathVariable String studentName) {
-        return leaveService.rejectLeave(studentName);
+    
+    @GetMapping("/Requested-Leaves")
+    public List<Leave> viewPendingLeaves(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        return leaveService.getPendingLeaves(userDetails.getUsername());
     }
 
-    @GetMapping("/Status/{studentId}")
-    public List<Leave> getLeaveStatus(@PathVariable Long studentId) {
-        return leaveService.getLeaveStatus(studentId);
-    }
+    
+    @PutMapping("/{leaveId}")
+    public Leave updateLeave(
+            @PathVariable Long leaveId,
+            @RequestParam LeaveStatus status,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
 
+        return leaveService.updateLeaveStatus(
+                leaveId,
+                status,
+                userDetails.getUsername());
+    }
 }

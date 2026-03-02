@@ -13,4 +13,6 @@ public class LeaveRequest {
     private LocalDate fromDate;
     private LocalDate toDate;
     private String reason;
+    private String className;
+    private String section;
 }
