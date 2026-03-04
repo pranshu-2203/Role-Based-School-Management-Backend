@@ -1,6 +1,24 @@
-# Smart School Backend
+# 🎓 ScholarSync  
+### Secure Role-Based School Management Backend
 
-**Smart School Backend** Smart School Backend is a secure, role-based School Management REST API built using Spring Boot and MySQL.
+![Status](https://img.shields.io/badge/Status-Actively_Maintained-brightgreen?style=flat)
+![Java](https://img.shields.io/badge/Java-17-ED8B00?style=flat&logo=java&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-6DB33F?style=flat&logo=spring&logoColor=white)
+![Spring Security](https://img.shields.io/badge/Spring_Security-6DB33F?style=flat&logo=spring&logoColor=white)
+![Spring Data JPA](https://img.shields.io/badge/Spring_Data_JPA-6DB33F?style=flat)
+![Hibernate](https://img.shields.io/badge/Hibernate-59666C?style=flat&logo=hibernate&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=flat&logo=mysql&logoColor=white)
+![JWT](https://img.shields.io/badge/Auth-JWT-black?style=flat&logo=jsonwebtokens)
+![Maven](https://img.shields.io/badge/Build-Maven-C71A36?style=flat&logo=apachemaven&logoColor=white)
+![Swagger](https://img.shields.io/badge/API-Swagger-85EA2D?style=flat&logo=swagger&logoColor=black)
+![REST API](https://img.shields.io/badge/API-REST-blue?style=flat)
+![Role Based Access](https://img.shields.io/badge/Security-Role_Based-blue?style=flat)
+![BCrypt](https://img.shields.io/badge/Password-BCrypt-orange?style=flat)
+![Architecture](https://img.shields.io/badge/Architecture-Clean-green?style=flat)
+
+A secure, role-based Smart School Management Backend built using Spring Boot, JWT authentication, and MySQL.
+
+**Secure Role-Based School Management Backend** is a secure, role-based School Management REST API built using Spring Boot and MySQL.
 It is designed to manage a school’s core academic workflow in a simple, controlled, and secure way.
 
 *This system focuses on three main areas:*
@@ -18,12 +36,12 @@ The goal of this project is to demonstrate secure backend architecture, role-bas
 
 ## Roles
 
-| Role           | Description                                           |
-|----------------|-------------------------------------------------------|
+| Role           | Description                                          |
+|----------------|------------------------------------------------------|
 | SUPER_ADMIN    | System administrator; can generate invite codes.     |
 | PRINCIPAL      | Head of school; can assign classes to teachers.      |
-| CLASS_TEACHER  | Handles leaves and students of their class/section. |
-| TEACHER        | Subject teacher (optional features can be extended). |
+| CLASS_TEACHER  | Handles leaves and students of their class/section.  |
+| TEACHER        | Subject teacher                                      |
 | STUDENT        | Can apply for leave and view leave status.           |
 
 ---
