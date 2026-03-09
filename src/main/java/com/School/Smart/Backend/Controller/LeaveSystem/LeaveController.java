@@ -2,6 +2,10 @@ package com.School.Smart.Backend.Controller.LeaveSystem;
 
 import java.util.List;
 
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,7 +33,6 @@ public class LeaveController {
         this.leaveService = leaveService;
     }
 
-  
     @PostMapping("/Apply")
     public ResponseEntity<?> applyLeave(
             @RequestBody LeaveRequest request,
@@ -39,7 +42,6 @@ public class LeaveController {
         return ResponseEntity.ok("Leave applied successfully");
     }
 
-   
     @GetMapping("/Leave-Status")
     public List<Leave> viewMyLeaves(
             @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -47,15 +49,18 @@ public class LeaveController {
         return leaveService.getStudentLeaves(userDetails.getUsername());
     }
 
-    
     @GetMapping("/Requested-Leaves")
-    public List<Leave> viewPendingLeaves(
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+    public Page<Leave> viewPendingLeaves(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @ParameterObject Pageable pageable) {
 
-        return leaveService.getPendingLeaves(userDetails.getUsername());
+        if (userDetails == null) {
+            throw new RuntimeException("User not authenticated");
+        }
+
+        return leaveService.getPendingLeaves(userDetails.getUsername(), pageable);
     }
 
-    
     @PutMapping("/{leaveId}")
     public Leave updateLeave(
             @PathVariable Long leaveId,

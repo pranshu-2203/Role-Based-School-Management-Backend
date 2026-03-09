@@ -5,6 +5,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -159,7 +163,31 @@ public class InviteCodeService {
         return invite;
     }
 
-    public List<InviteCode> getCodeByGenerator(Long generatedById) {
-        return inviteCodeRepository.findByGeneratedById(generatedById);
+    public Page<InviteCode> getCodeByGenerator(
+            Long generatedById,
+            Boolean used,
+            Role roleAllowed,
+            String subject,
+            int page,
+            int size) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+
+        if (used != null) {
+            return inviteCodeRepository.findByGeneratedByIdAndIsUsed(
+                    generatedById, used, pageable);
+        }
+
+        if (roleAllowed != null) {
+            return inviteCodeRepository.findByGeneratedByIdAndRoleAllowed(
+                    generatedById, roleAllowed, pageable);
+        }
+
+        if (subject != null) {
+            return inviteCodeRepository.findByGeneratedByIdAndSubjectContaining(
+                    generatedById, subject, pageable);
+        }
+
+        return inviteCodeRepository.findByGeneratedById(generatedById, pageable);
     }
 }

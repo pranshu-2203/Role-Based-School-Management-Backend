@@ -2,6 +2,8 @@ package com.School.Smart.Backend.Service.LeaveSystemService;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.School.Smart.Backend.DTO.LeaveSystem.LeaveRequest;
@@ -24,7 +26,6 @@ public class LeaveService {
         this.leaveRepository = leaveRepository;
     }
 
-   
     public void applyLeave(LeaveRequest request, String email) {
 
         User student = userRepository.findByEmail(email)
@@ -57,7 +58,7 @@ public class LeaveService {
         leaveRepository.save(leave);
     }
 
-    public List<Leave> getPendingLeaves(String email) {
+    public Page<Leave> getPendingLeaves(String email, Pageable pageable) {
 
         User teacher = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -66,13 +67,12 @@ public class LeaveService {
             throw new RuntimeException("Only class teachers can view leaves");
         }
 
-        return leaveRepository
-                .findByTeacherIdAndStatus(
-                        teacher.getId(),
-                        LeaveStatus.PENDING);
+        return leaveRepository.findByTeacherIdAndStatus(
+                teacher.getId(),
+                LeaveStatus.PENDING,
+                pageable);
     }
 
-    
     public Leave updateLeaveStatus(Long leaveId,
             LeaveStatus newStatus,
             String email) {
@@ -99,7 +99,6 @@ public class LeaveService {
         return leaveRepository.save(leave);
     }
 
-   
     public List<Leave> getStudentLeaves(String email) {
 
         User student = userRepository.findByEmail(email)

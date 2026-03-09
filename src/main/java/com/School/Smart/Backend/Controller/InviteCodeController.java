@@ -18,82 +18,82 @@ import org.springframework.http.ResponseEntity;
 @RequiredArgsConstructor
 public class InviteCodeController {
 
-    private final InviteCodeService inviteCodeService;
+        private final InviteCodeService inviteCodeService;
 
-    // Principal generating ClassTeacher invite
-    @PostMapping("/principal/generate")
-    public ResponseEntity<InviteCode> generateForClassTeacher(
-            @RequestParam String className,
-            @RequestParam String section,
-            @RequestParam Role roleAllowed,
-            @RequestParam Long principalId,
-            @RequestParam(required = false) List<String> subjects,
-            @RequestParam String intendedPersonName) {
+        // Principal generating ClassTeacher invite
+        @PostMapping("/principal/generate")
+        public ResponseEntity<InviteCode> generateForClassTeacher(
+                        @RequestParam String className,
+                        @RequestParam String section,
+                        @RequestParam Role roleAllowed,
+                        @RequestParam Long principalId,
+                        @RequestParam(required = false) List<String> subjects,
+                        @RequestParam String intendedPersonName) {
 
-        InviteCode code = inviteCodeService.generateCode(
-                roleAllowed,
-                className,
-                section,
-                subjects,
-                principalId,
-                intendedPersonName
-        );
+                InviteCode code = inviteCodeService.generateCode(
+                                roleAllowed,
+                                className,
+                                section,
+                                subjects,
+                                principalId,
+                                intendedPersonName);
 
-        return ResponseEntity.ok(code);
-    }
+                return ResponseEntity.ok(code);
+        }
 
-    // ClassTeacher generating Teacher or Student invite
-    @PostMapping("/classTeacher/generate")
-    public ResponseEntity<InviteCode> generateForStudentOrTeacher(
-            @RequestParam String className,
-            @RequestParam String section,
-            @RequestParam(required = false) List<String> subjects,
-            @RequestParam Role roleAllowed,
-            @RequestParam Long generatedById,
-            @RequestParam String intendedPersonName) {
+        // ClassTeacher generating Teacher or Student invite
+        @PostMapping("/classTeacher/generate")
+        public ResponseEntity<InviteCode> generateForStudentOrTeacher(
+                        @RequestParam String className,
+                        @RequestParam String section,
+                        @RequestParam(required = false) List<String> subjects,
+                        @RequestParam Role roleAllowed,
+                        @RequestParam Long generatedById,
+                        @RequestParam String intendedPersonName) {
 
-        InviteCode code = inviteCodeService.generateCode(
-                roleAllowed,
-                className,
-                section,
-                subjects,
-                generatedById,
-                intendedPersonName
-        );
+                InviteCode code = inviteCodeService.generateCode(
+                                roleAllowed,
+                                className,
+                                section,
+                                subjects,
+                                generatedById,
+                                intendedPersonName);
 
-        return ResponseEntity.ok(code);
-    }
+                return ResponseEntity.ok(code);
+        }
 
     @GetMapping("/list")
-    public ResponseEntity<List<InviteCode>> listInviteCodes(
-            @RequestParam Long generatedById) {
+    public ResponseEntity<?> listInviteCodes(
+                 @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam Long generatedById,
+        @RequestParam(required = false) Boolean used,
+        @RequestParam(required = false) Role roleAllowed,
+        @RequestParam(required = false) String subject) {
 
         return ResponseEntity.ok(
-                inviteCodeService.getCodeByGenerator(generatedById)
+                inviteCodeService.getCodeByGenerator(generatedById,used, roleAllowed, subject, page, size)
         );
     }
 
-    @PostMapping("/mass-generate")
-    public ResponseEntity<List<InviteCode>> massGenerate(
-            @Valid @RequestBody MassGenerateInviteRequest request) {
+        @PostMapping("/mass-generate")
+        public ResponseEntity<List<InviteCode>> massGenerate(
+                        @Valid @RequestBody MassGenerateInviteRequest request) {
 
-        return ResponseEntity.ok(
-                inviteCodeService.massGenerateCodes(
-                        request.getRoleAllowed(),
-                        request.getClassName(),
-                        request.getSection(),
-                        request.getSubjectPerTeacher(),
-                        request.getGeneratedById(),
-                        request.getNames()
-                )
-        );
-    }
+                return ResponseEntity.ok(
+                                inviteCodeService.massGenerateCodes(
+                                                request.getRoleAllowed(),
+                                                request.getClassName(),
+                                                request.getSection(),
+                                                request.getSubjectPerTeacher(),
+                                                request.getGeneratedById(),
+                                                request.getNames()));
+        }
 
-    @GetMapping("/preview/{code}")
-    public ResponseEntity<InviteCode> preview(@PathVariable String code) {
+        @GetMapping("/preview/{code}")
+        public ResponseEntity<InviteCode> preview(@PathVariable String code) {
 
-        return ResponseEntity.ok(
-                inviteCodeService.getValidInviteWithoutUsing(code)
-        );
-    }
+                return ResponseEntity.ok(
+                                inviteCodeService.getValidInviteWithoutUsing(code));
+        }
 }
