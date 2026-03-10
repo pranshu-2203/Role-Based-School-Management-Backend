@@ -19,4 +19,19 @@ public interface InviteCodeRepository extends JpaRepository<InviteCode, Long> {
     Page<InviteCode> findByGeneratedByIdAndRoleAllowed(Long generatedById, Role roleAllowed, Pageable pageable);
 
     Page<InviteCode> findByGeneratedByIdAndSubjectContaining(Long generatedById, String subject, Pageable pageable);
+
+    ///
+    
+    Page<InviteCode> findByGeneratedByIdAndIsUsedAndRoleAllowed(
+            Long generatedById, Boolean used, Role roleAllowed, Pageable pageable);
+
+    Page<InviteCode> findByGeneratedByIdAndIsUsedAndSubjectContaining(
+            Long generatedById, Boolean used, String subject, Pageable pageable);
+
+    Page<InviteCode> findByGeneratedByIdAndRoleAllowedAndSubjectContaining(
+            Long generatedById, Role roleAllowed, String subject, Pageable pageable);
+
+    Page<InviteCode> findByGeneratedByIdAndIsUsedAndRoleAllowedAndSubjectContaining(
+            Long generatedById, Boolean used, Role roleAllowed, String subject, Pageable pageable); 
 }
+

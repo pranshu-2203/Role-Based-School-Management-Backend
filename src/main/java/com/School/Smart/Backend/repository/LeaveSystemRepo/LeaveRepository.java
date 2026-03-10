@@ -19,4 +19,7 @@ public interface LeaveRepository extends JpaRepository<Leave, Long> {
             Long teacherId,
             LeaveStatus status,
             Pageable pageable);
-}
+
+
+    
+    }

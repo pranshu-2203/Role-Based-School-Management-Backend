@@ -173,19 +173,36 @@ public class InviteCodeService {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
 
+        if (used != null && roleAllowed != null && subject != null) {
+            return inviteCodeRepository.findByGeneratedByIdAndIsUsedAndRoleAllowedAndSubjectContaining(
+                    generatedById, used, roleAllowed, subject, pageable);
+        }
+
+        if (used != null && roleAllowed != null) {
+            return inviteCodeRepository.findByGeneratedByIdAndIsUsedAndRoleAllowed(
+                    generatedById, used, roleAllowed, pageable);
+        }
+
+        if (used != null && subject != null) {
+            return inviteCodeRepository.findByGeneratedByIdAndIsUsedAndSubjectContaining(
+                    generatedById, used, subject, pageable);
+        }
+
+        if (roleAllowed != null && subject != null) {
+            return inviteCodeRepository.findByGeneratedByIdAndRoleAllowedAndSubjectContaining(
+                    generatedById, roleAllowed, subject, pageable);
+        }
+
         if (used != null) {
-            return inviteCodeRepository.findByGeneratedByIdAndIsUsed(
-                    generatedById, used, pageable);
+            return inviteCodeRepository.findByGeneratedByIdAndIsUsed(generatedById, used, pageable);
         }
 
         if (roleAllowed != null) {
-            return inviteCodeRepository.findByGeneratedByIdAndRoleAllowed(
-                    generatedById, roleAllowed, pageable);
+            return inviteCodeRepository.findByGeneratedByIdAndRoleAllowed(generatedById, roleAllowed, pageable);
         }
 
         if (subject != null) {
-            return inviteCodeRepository.findByGeneratedByIdAndSubjectContaining(
-                    generatedById, subject, pageable);
+            return inviteCodeRepository.findByGeneratedByIdAndSubjectContaining(generatedById, subject, pageable);
         }
 
         return inviteCodeRepository.findByGeneratedById(generatedById, pageable);

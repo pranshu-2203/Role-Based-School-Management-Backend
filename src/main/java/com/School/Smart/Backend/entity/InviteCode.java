@@ -44,7 +44,7 @@ public class InviteCode {
                                                                                              // invite_codes.id
     )
     @Column(name = "subject")
-    private List<String> Subject;
+    private List<String> subject;
     private Long generatedById;
     @Enumerated(EnumType.STRING)
     private Role generatedByRole;
