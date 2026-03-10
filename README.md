@@ -246,6 +246,7 @@ src/main/java/com/School/Smart/Backend
 - [Installation & Setup](#installation--setup)
 - [API Documentation](#api-documentation)
 - [Sample API Requests & Responses](#sample-api-requests--responses)
+- [Pagination & Filtering](#pagination--filtering)
 - [Security Design](#security-design)
 - [Future Improvements](#future-improvements) 
 
@@ -327,7 +328,110 @@ src/main/java/com/School/Smart/Backend
 
   -Result Controller
 
+---
+## Pagination & Filtering
 
+Some APIs support **pagination and filtering** to efficiently handle large datasets and improve performance.
+
+### Supported APIs
+
+- Invite List API  
+- Requested Leaves API  
+
+### Query Parameters
+
+| Parameter | Type | Description | Example |
+|----------|------|-------------|---------|
+| page | integer | Page number (starts from 0) | `page=0` |
+| size | integer | Number of records per page | `size=10` |
+| sort | string | Sorting field and order | `sort=createdAt,desc` |
+| used | boolean | Filter invite codes by usage status | `used=false` |
+| roleAllowed | string | Filter invite codes by role | `roleAllowed=TEACHER` |
+| subject | string | Filter invite codes by subject | `subject=Physics` |
+| generatedById | integer | Filter invites by creator | `generatedById=2` |
+
+### Example: Requested Leaves with Pagination
+
+> GET `/leave/Requested-Leaves?page=0&size=20`
+
+Response Example
+
+```json
+        {
+            "content": [
+            {
+                "id": 4,
+                "studentName": "Prateek Kaushik",
+                "studentId": 20,
+                "className": "10",
+                "section": "A",
+                "reason": "Medical Leave",
+                "status": "PENDING"
+                }
+            ],
+            "totalElements": 1,
+            "totalPages": 1,
+            "size": 20,
+            "number": 0
+        }
+```
+
+### Example: Invite List with Pagination & Filtering
+
+> GET `/api/invite/list?page=0&size=10&generatedById=2&used=true&roleAllowed=TEACHER&subject=Mathematics`
+
+Response Example    
+
+```json
+{
+  "content": [
+    {
+      "id": 113,
+      "code": "3YLFJ7PLND",
+      "roleAllowed": "TEACHER",
+      "className": "10",
+      "section": "A",
+      "subject": [
+        "Mathematics"
+      ],
+      "generatedById": 2,
+      "generatedByRole": "CLASS_TEACHER",
+      "usedById": 4,
+      "expiryTime": "2026-02-28T08:35:18.285185",
+      "createdAt": "2026-02-27T20:35:18.285185",
+      "intendedPersonName": "Ritika Choudhary",
+      "used": true
+    }
+  ],
+  "pageable": {
+    "pageNumber": 0,
+    "pageSize": 10,
+    "sort": {
+      "empty": false,
+      "sorted": true,
+      "unsorted": false
+    },
+    "offset": 0,
+    "paged": true,
+    "unpaged": false
+  },
+  "last": true,
+  "totalElements": 1,
+  "totalPages": 1,
+  "first": true,
+  "size": 10,
+  "number": 0,
+  "sort": {
+    "empty": false,
+    "sorted": true,
+    "unsorted": false
+  },
+  "numberOfElements": 1,
+  "empty": false
+}
+
+
+```
 ---
 ## Sample API Requests & Responses
 
@@ -336,7 +440,7 @@ src/main/java/com/School/Smart/Backend
 >POST /api/auth/register
 
   Request
-
+```json
     {
       "email": "student@gmail.com",
       "password": "password123",
@@ -344,7 +448,7 @@ src/main/java/com/School/Smart/Backend
       "inviteCode": "INV-12345",
       "fullname": "Rahul Sharma"
     }
-    
+```
 Response
 
     "OTP Sent successfully"
@@ -354,6 +458,7 @@ Response
 
 >POST /api/auth/verify-otp
 
+```json
   Request
   
     {
@@ -363,6 +468,7 @@ Response
     "otp": "288839"
 
     }
+```
   Response
 
     "OTP verified successfully"
@@ -372,7 +478,7 @@ Response
 >POST /api/auth/login
 
   Request
-    
+ ```json   
     {
   
     "email": "student@gmail.com",
@@ -380,7 +486,9 @@ Response
     "password": "password123"
 
     }
+```
   Response
+  ```json
 
     {
   
@@ -391,14 +499,15 @@ Response
     "userId": 15
 
     }
-
+```
 
 *Apply Leave*
 
 >POST /leave/Apply
 
   Request
-    
+
+```json
     {
   
     "studentid": 15,
@@ -414,6 +523,7 @@ Response
     "section": "A"
 
     }
+```
   Response
 
     Leave applied successfully
@@ -423,7 +533,7 @@ Response
 >GET /leave/Requested-Leaves
 
   Response 
-
+```json
     [
       {
         "id": 5,
@@ -452,13 +562,14 @@ Response
         "status": "PENDING"
       }
     ]
-
+```
 *Add Result*
 
 >POST /Result/Add
 
   Request
-    
+
+```json
     {
       "studentId": 15,
       "studentName": "Rahul Sharma",
@@ -486,13 +597,13 @@ Response
       "passStatus": "OUTSTANDING"
     }
 
-
+```
 *Get Student Results*
 
 >GET /Result/student
 
   Response
-    
+```json 
     [
       {
         "id": 10,
@@ -507,7 +618,7 @@ Response
         "passStatus": "OUTSTANDING"
       }
     ]
-
+```
 
 ---
 ## Security Design
