@@ -3,13 +3,13 @@ spring:
     name: smart-school-backend
 
   datasource:
-    url: jdbc:mysql://localhost:3306/schooldatabase
-    username: schooluser1
-    password: pass123
+    url: jdbc:mysql://${MYSQLHOST}:${MYSQLPORT}/${MYSQLDATABASE}
+    username: ${MYSQLUSER}
+    password: ${MYSQLPASSWORD}
 
   jpa:
     hibernate:
-      ddl-auto: "update"
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
